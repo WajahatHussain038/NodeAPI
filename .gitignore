@@ -1,0 +1,6 @@
+# Dependencies
+node_modules/
+
+# API keys and sensitive environment credentials
+.env
+*.env

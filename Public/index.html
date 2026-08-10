@@ -1,0 +1,110 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>User Data Test App Manull</title>
+    <link rel="stylesheet" href="/css/bootstrap.min.css" />
+  </head>
+  <body>
+    <div class="mx-auto p-2" style="width: 80%">
+      <div id="responseMessage"></div>
+      <form id="addUserFrom">
+        <div class="mb-3">
+          <label for="formGroupExampleInput" class="form-label"
+            >User Name</label
+          >
+          <input
+            type="text"
+            class="form-control"
+            id="username"
+            name="username"
+            placeholder="Example input placeholder"
+          />
+        </div>
+        <div class="mb-3">
+          <label for="exampleFormControlInput1" class="form-label"
+            >Email address</label
+          >
+          <input
+            type="email"
+            class="form-control"
+            id="email"
+            name="email"
+            placeholder="name@example.com"
+          />
+        </div>
+        <label for="inputPassword5" class="form-label">Password</label>
+        <input
+          type="password"
+          id="password"
+          name="password"
+          class="form-control"
+          aria-describedby="passwordHelpBlock"
+        />
+        <div id="passwordHelpBlock" class="form-text">
+          Your password must be 8-20 characters long, contain letters and
+          numbers, and must not contain spaces, special characters, or emoji.
+        </div>
+        <div class="col-12">
+          <button type="submit" class="btn btn-primary">
+            Submit User Data
+          </button>
+        </div>
+      </form>
+    </div>
+
+    <script src="/js/bootstrap.bundle.min.js">
+
+      document.getElementById('addUserFrom').addEventListener('submit', function(event) {
+          event.preventDefault(); // Prevent default form reload
+
+         async function pustData()
+         {
+            const responseDiv = document.getElementById('responseMessage');
+         const requestData = {
+            username  : document.getElementById('username').value,
+            email     : document.getElementById('email').value ,
+            password  : document.getElementById('password').value
+
+         }
+
+
+
+              try{
+               const response = await fetch('/api/users',{
+                method:'POST',
+                header:{
+                    'Content-Type':'application/json'
+
+                },
+                body: JSON.stringify(requestData)
+               })
+                 const resData = await response.json();
+
+                response.responseDiv.classList.remove('d-done','alert-sucess','alert-danger');
+                if (response.ok)
+               {
+                  responseDiv.classList.add('alert-sucess');
+                  responseDiv.innerText = resData.message;
+                  document.getElementById('addUserFrom').reset();
+               }
+               else {
+                   responseDiv.classList.add('alert-danger');
+                   responseDiv.innerText = data.err || 'Something went wrong.';
+               }
+              } catch(error) {
+                responseDiv.classList.remove('d-done','alert-success');
+                responseDiv.classList.add('alert-danger');
+                responseDiv.innerText = 'Failed to connect to the server';
+              }
+         }
+
+
+          pustData();
+
+
+      });
+    </script>
+  </body>
+</html>
