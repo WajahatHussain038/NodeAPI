@@ -73,7 +73,6 @@ router.get("/validToken", (req, res) => {
   const authHeader = req.headers["authorization"];
   // Format typically looks like: "Bearer <TOKEN>"
   const token = authHeader && authHeader.split(" ")[1];
-  console.log(config.get("jwtPrivateKey"));
   if (!token) {
     return res
       .status(401)
@@ -112,6 +111,10 @@ router.get("/alluser", (req, res) => {
     }
   }
   getAllUser();
+});
+
+router.delete("/:id", auth, (req, res) => {
+  console.log("Delete Method");
 });
 
 module.exports = router;
