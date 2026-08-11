@@ -16,9 +16,25 @@ const userSchema = mongoose.Schema({
 });
 
 userSchema.methods.genrateAuthToken = function () {
-  const token = jwt.sign({ _id: this.id }, config.get("jwtPrivateKey"));
+  const token = jwt.sign({ _id: this.id }, config.get("jwtPrivateKey"), {
+    expiresIn: 3600,
+  });
   return token;
 };
+
+// userSchema.methods.
+tokenValidation = function (token) {
+  // Verify a token
+  jwt.verify(token, config.get("jwtPrivateKey"), (err, decodedToken) => {
+    if (err) {
+      return "Token verification failed";
+    } else {
+      return "decodedToken";
+    }
+  });
+  console.log("1111 Token Validation Method");
+};
+
 const User = mongoose.model("User", userSchema);
 router.post("/", (req, res) => {
   async function SaveUser() {
@@ -51,6 +67,35 @@ router.get("/login", (req, res) => {
     return res.send("Wrong Username or Password");
   }
   getUser();
+});
+
+router.get("/validToken", (req, res) => {
+  const authHeader = req.headers["authorization"];
+  // Format typically looks like: "Bearer <TOKEN>"
+  const token = authHeader && authHeader.split(" ")[1];
+  console.log(config.get("jwtPrivateKey"));
+  if (!token) {
+    return res
+      .status(401)
+      .json({ message: "Access Denied: No Token Provided" });
+  }
+
+  try {
+    // 2. Verify the token using your secret key
+    const verified = jwt.verify(token, config.get("jwtPrivateKey"));
+
+    // 3. Attach the decoded payload (e.g., user id) to the request object
+    // req.user = verified;
+    console.log(verified);
+    res.status(200).json({ message: verified });
+    // 4. Move to the next middleware or route handler
+    // next();
+  } catch (error) {
+    res.status(403).json({ message: "Invalid or Expired Token" });
+  }
+
+  // console.log(token);
+  // return res.send("Token Validation Method");
 });
 
 router.get("/alluser", (req, res) => {
