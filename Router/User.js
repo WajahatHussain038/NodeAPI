@@ -24,6 +24,7 @@ userSchema.methods.genrateAuthToken = function () {
     expiresIn: 3600,
   });
   return token;
+
 };
 
 // userSchema.methods.
@@ -67,7 +68,7 @@ router.get("/login", (req, res) => {
     if (validUser) {
       return res
         .header("x-auth-token", user.genrateAuthToken())
-        .send(_.pick(user, ["username", "email","role"]));
+        .send(_.pick(user, ["username", "email"]));
     }
     return res.send("Wrong Username or Password");
   }
