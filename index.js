@@ -7,6 +7,8 @@ const userRouter = require("./router/User");
 app.set("view engine", "hbs");
 // app.set("views", path.join(__dirname, "views"));
 
+
+
 if (!config.get("jwtPrivateKey")) {
   console.error("Fatal Error: jwtPrivateKey not define");
   process.exit(1);

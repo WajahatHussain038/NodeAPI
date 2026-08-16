@@ -13,10 +13,14 @@ const userSchema = mongoose.Schema({
   username: { type: String },
   email: { type: String },
   password: { type: String },
+  role:{type:String ,
+    enum : ['admin','superuser','user'],
+    defult:'user'
+  }
 });
 
 userSchema.methods.genrateAuthToken = function () {
-  const token = jwt.sign({ _id: this.id }, config.get("jwtPrivateKey"), {
+  const token = jwt.sign({ _id: this.id , role:this.role }, config.get("jwtPrivateKey"), {
     expiresIn: 3600,
   });
   return token;
@@ -44,6 +48,7 @@ router.post("/", (req, res) => {
       username: req.body.username,
       email: req.body.email,
       password: hasedPass,
+      role:req.body.role,
     });
     const userResult = await user.save();
     if (userResult) {
@@ -62,7 +67,7 @@ router.get("/login", (req, res) => {
     if (validUser) {
       return res
         .header("x-auth-token", user.genrateAuthToken())
-        .send(_.pick(user, ["username", "email"]));
+        .send(_.pick(user, ["username", "email","role"]));
     }
     return res.send("Wrong Username or Password");
   }
