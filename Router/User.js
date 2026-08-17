@@ -13,10 +13,9 @@ const userSchema = mongoose.Schema({
   username: { type: String },
   email: { type: String },
   password: { type: String },
-  role:{type:String ,
-    enum : ['admin','superuser','user'],
-    defult:'user'
-  }
+  role: { type: String, enum: ['admin', 'superuser', 'user'], default: 'user' },
+  createdAt: { type: Date, default: Date.now },
+  updatedAt: {type: Date, default: Date.now}
 });
 
 userSchema.methods.genrateAuthToken = function () {
@@ -64,13 +63,16 @@ router.post("/", (req, res) => {
 router.get("/login", (req, res) => {
   async function getUser() {
     const user = await User.findOne({ username: req.body.username });
+    if (user){
     const validUser = await bcrypt.compare(req.body.password, user.password);
     if (validUser) {
       return res
         .header("x-auth-token", user.genrateAuthToken())
-        .send(_.pick(user, ["username", "email"]));
+        .send(_.pick(user, ["_id","username", "email"]));
     }
-    return res.send("Wrong Username or Password");
+    return res.status(404).send("Invalid Username or Password");
+}
+ return res.status(404).send("Invalid Username or Password");
   }
   getUser();
 });
@@ -119,8 +121,87 @@ router.get("/alluser", (req, res) => {
   getAllUser();
 });
 
-router.delete("/:id", auth, (req, res) => {
-  console.log("Delete Method");
+router.delete("/:id", auth, async (req, res) => {
+   const authorizedroles = ['admin', 'superuser']
+   
+
+    const currentUser = req.user._id;
+ console.log(req.body);
+     if  (currentUser.toString() === req.params.id || authorizedroles.includes(req.user.role) )
+     {
+
+
+    try {
+        // 2. Fixed spelling to findByIdAndUpdate
+        // 3. Added { new: true } to return the modified document
+        const deletedUser = await User.findByIdAndDelete( req.params.id );
+
+        // 4. Handle case where user ID doesn't exist
+        if (!deletedUser) {
+            return res.status(404).json({ message: "User not found" });
+        }
+
+        // 5. Send a response back to the client
+        res.status(200).json({message:"User Delete Successfully"});
+
+    } catch (error) {
+        // 6. Handle server/validation errors
+        res.status(500).json({ message: "Server error", error: error.message });
+    }
+  
+
+  } else {
+    res.status(401).json({ message: "UnAuthorized Happy Coding"});
+  }
 });
+
+
+router.put("/:id", auth, async (req, res) => {
+
+   const authorizedroles = ['admin', 'superuser']
+   
+
+    const currentUser = req.user._id;
+ console.log(req.body);
+     if  (currentUser.toString() === req.params.id && authorizedroles.includes(req.user.role) )
+     {
+
+
+    try {
+        // 2. Fixed spelling to findByIdAndUpdate
+        // 3. Added { new: true } to return the modified document
+        const updatedUser = await User.findByIdAndUpdate(
+            req.params.id,
+            {
+                username: req.body.username,
+                email: req.body.email, 
+               // role: req.body.role, 
+                // Note: Mongoose handles updatedAt automatically if timestamps: true is enabled in your schema
+                updatedAt: new Date() 
+            },
+            { new: true, runValidators: true } 
+        );
+
+        // 4. Handle case where user ID doesn't exist
+        if (!updatedUser) {
+            return res.status(404).json({ message: "User not found" });
+        }
+
+        // 5. Send a response back to the client
+        res.status(200).json(updatedUser);
+
+    } catch (error) {
+        // 6. Handle server/validation errors
+        res.status(500).json({ message: "Server error", error: error.message });
+    }
+  
+
+  } else {
+    res.status(401).json({ message: "UnAuthorized Happy Coding"});
+  }
+  
+});
+
+
 
 module.exports = router;

@@ -15,9 +15,9 @@ function auth(req, res, next) {
     const verified = jwt.verify(token, config.get("jwtPrivateKey"));
 
     // 3. Attach the decoded payload (e.g., user id) to the request object
-    // req.user = verified;
+     req.user = verified;
     console.log(verified);
-    res.status(200).json({ message: verified });
+    //res.status(200).json({ message: verified });
     // 4. Move to the next middleware or route handler
     next();
   } catch (error) {
